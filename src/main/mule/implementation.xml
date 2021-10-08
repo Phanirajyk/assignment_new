@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="47d7bdb5-98c2-4f5c-8fe1-e894e25cce4a" >
+		<salesforce:basic-connection username="phaniraj.yk@apisero.com" password="Pruthvi@123" securityToken="ZMtr9cSaXafZSRynvVveDxpa" />
+	</salesforce:sfdc-config>
+	<sub-flow name="getorders" doc:id="ce6e8fe4-8338-4c43-8313-ac8f2f8ea582" >
+		<salesforce:query doc:name="Query" doc:id="458db9af-6181-4cf2-b79e-41a049faeaed" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[select Id,Name,cust_user_ids__c from Cust_order__c where Id = ':Id']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	Id : vars.orderId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="11be38d1-bf47-42ef-a782-62a5666bf7d5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="062e75df-9b96-4b18-9cd2-bc5d49971788" message="#[payload]"/>
+	</sub-flow>
+	<sub-flow name="createorder" doc:id="df2f9c40-0c5c-4380-b197-090cdaeffa56" >
+		<salesforce:create doc:name="Create" doc:id="ca36c135-fbd6-411d-a393-e4e55b75b970" config-ref="Salesforce_Config" type="Cust_order__c"/>
+		<ee:transform doc:name="Transform Message" doc:id="8bde806c-1167-4be1-bfe0-a05d65876e69" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="185a0fa2-6e35-414a-af7b-aa292197b873" message="#[payload]"/>
+	</sub-flow>
+	<sub-flow name="createuser" doc:id="1d2fc45e-485e-46b5-b1ea-4a285cf37fac" >
+		<salesforce:create doc:name="Create" doc:id="a399efb7-2e8f-4e48-a1a2-a4567764d6f3" config-ref="Salesforce_Config" type="cust_user__c"/>
+		<ee:transform doc:name="Transform Message" doc:id="9ffcc2aa-5928-47b7-b0b5-05067baf8729" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0aef37e1-a957-473a-854e-609b1095c829" message="#[payload]"/>
+	</sub-flow>
+	<sub-flow name="getitem" doc:id="84e4a2e7-f2df-4d57-9eab-e0757eee5c56" >
+		<salesforce:query doc:name="Query" doc:id="b95dc328-6594-4af7-9fa6-6b12f669f20a" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[select Id,Name,item_id__c from cust_items_list__C where Id = ':Id' and item_id__c= :itemId]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	itemId : vars.itemId,
+	Id : vars.orderId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="a4c71eb4-9795-45bd-85e6-f99872783f76" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d421be1a-26d9-41ee-827b-b588dfbaa0e0" message="#[payload]"/>
+	</sub-flow>
+	<sub-flow name="deleteuser" doc:id="7c893481-099d-48ef-b06b-dd411c4e83d6" >
+		<salesforce:query doc:name="Query" doc:id="48b2ab35-f37c-4c67-a202-bc2c31e559fb" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[select Id, Name, cust_user_ids__c from cust_user__c where cust_user_ids__c =':userId']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	userId : vars.userId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="95cd94b1-e324-4cbc-b3de-c001a5f4881a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map{
+	Id :$.Id,
+	cust_user_ids__c :$.cust_user_ids__c,
+	Name :$.Name
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:delete doc:name="Delete" doc:id="69e14ef9-cef2-4a6e-a37b-99375637b9ee" config-ref="Salesforce_Config">
+			<salesforce:ids ><![CDATA[#[payload.Id]]]></salesforce:ids>
+		</salesforce:delete>
+		<ee:transform doc:name="Transform Message" doc:id="0eca1a9e-cbb4-4f4c-a6f1-84db967decbc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="111a7856-60fb-4a24-bc36-baa5901ef5d6" message="#[payload]"/>
+	</sub-flow>
+</mule>
