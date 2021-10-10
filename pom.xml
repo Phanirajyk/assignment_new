@@ -35,7 +35,7 @@
       		<muleVersion>4.3.0</muleVersion>
       		<username>phanirajyk</username>
 		    <password>Pruthvi@123</password>
-		    <applicationName>${cloudhub.application.name}</applicationName>
+		    <applicationName>${anypoint.applicationname}</applicationName>
 		    <environment>Sandbox</environment>
 		    <region>us-east-2</region>
 		    <workers>1</workers>
