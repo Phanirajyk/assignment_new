@@ -44,7 +44,7 @@
 						<objectStoreV2>true</objectStoreV2>
 						<properties>
 							<http.port>8081</http.port>
-							<mule.env>Sandbox</mule.env>
+							<mule.env>Apisero</mule.env>
 						</properties>
 					</cloudHubDeployment>
 				</configuration>
